@@ -215,7 +215,7 @@ def inference(args):
         mixed_x = np.abs(mixed_cmplx_x)
         
         # Process data. 
-        n_pad = (n_concat - 1) / 2
+        n_pad = int((n_concat - 1) / 2)
         mixed_x = pp_data.pad_with_border(mixed_x, n_pad)
         mixed_x = pp_data.log_sp(mixed_x)
         speech_x = pp_data.log_sp(speech_x)
