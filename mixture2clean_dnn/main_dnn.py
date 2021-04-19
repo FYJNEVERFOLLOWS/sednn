@@ -7,18 +7,20 @@ Modified: -
 import numpy as np
 import os
 import pickle
-import cPickle
 import h5py
 import argparse
 import time
 import glob
 import matplotlib.pyplot as plt
 
+from evaluate import calculate_pesq
 import prepare_data as pp_data
 import config as cfg
 from data_generator import DataGenerator
 from spectrogram_to_wave import recover_wav
+from sklearn.preprocessing import _data
 
+import keras
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.optimizers import Adam
@@ -137,7 +139,7 @@ def train(args):
                     'tr_loss': tr_loss, 
                     'te_loss': te_loss, }
     stat_path = os.path.join(stats_dir, "%diters.p" % iter)
-    cPickle.dump(stat_dict, open(stat_path, 'wb'), protocol=cPickle.HIGHEST_PROTOCOL)
+    pickle.dump(stat_dict, open(stat_path, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
     
     # Train. 
     t1 = time.time()
@@ -156,7 +158,7 @@ def train(args):
                          'tr_loss': tr_loss, 
                          'te_loss': te_loss, }
             stat_path = os.path.join(stats_dir, "%diters.p" % iter)
-            cPickle.dump(stat_dict, open(stat_path, 'wb'), protocol=cPickle.HIGHEST_PROTOCOL)
+            pickle.dump(stat_dict, open(stat_path, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
             
         # Save model. 
         if iter % 5000 == 0:
@@ -208,7 +210,7 @@ def inference(args):
     for (cnt, na) in enumerate(names):
         # Load feature. 
         feat_path = os.path.join(feat_dir, na)
-        data = cPickle.load(open(feat_path, 'rb'))
+        data = pickle.load(open(feat_path, 'rb'))
         [mixed_cmplx_x, speech_x, noise_x, alpha, na] = data
         mixed_x = np.abs(mixed_cmplx_x)
         
@@ -245,7 +247,7 @@ def inference(args):
             axs[0].set_title("%ddb mixture log spectrogram" % int(te_snr))
             axs[1].set_title("Clean speech log spectrogram")
             axs[2].set_title("Enhanced speech log spectrogram")
-            for j1 in xrange(3):
+            for j1 in range(3):
                 axs[j1].xaxis.tick_bottom()
             plt.tight_layout()
             plt.show()

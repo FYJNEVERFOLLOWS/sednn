@@ -6,6 +6,7 @@ Modified: -
 """
 import os
 import soundfile
+import librosa
 import numpy as np
 import argparse
 import csv
@@ -13,7 +14,6 @@ import time
 import matplotlib.pyplot as plt
 from scipy import signal
 import pickle
-import cPickle
 import h5py
 from sklearn import preprocessing
 
@@ -100,7 +100,7 @@ def create_mixture_csv(args):
                 nosie_offset = noise_onset + len_speech
             
             if cnt % 100 == 0:
-                print cnt
+                print(cnt)
                 
             cnt += 1
             f.write("%s\t%s\t%d\t%d\n" % (speech_na, noise_na, noise_onset, nosie_offset))
@@ -129,13 +129,13 @@ def calculate_mixture_features(args):
     
     # Open mixture csv. 
     mixture_csv_path = os.path.join(workspace, "mixture_csvs", "%s.csv" % data_type)
-    with open(mixture_csv_path, 'rb') as f:
+    with open(mixture_csv_path, 'rt') as f:
         reader = csv.reader(f, delimiter='\t')
         lis = list(reader)
     
     t1 = time.time()
     cnt = 0
-    for i1 in xrange(1, len(lis)):
+    for i1 in range(1, len(lis)):
         [speech_na, noise_na, noise_onset, noise_offset] = lis[i1]
         noise_onset = int(noise_onset)
         noise_offset = int(noise_offset)
@@ -182,7 +182,7 @@ def calculate_mixture_features(args):
             data_type, "%ddb" % int(snr), "%s.p" % out_bare_na)
         create_folder(os.path.dirname(out_feat_path))
         data = [mixed_complx_x, speech_x, noise_x, alpha, out_bare_na]
-        cPickle.dump(data, open(out_feat_path, 'wb'), protocol=cPickle.HIGHEST_PROTOCOL)
+        pickle.dump(data, open(out_feat_path, 'wb'), protocol=pickle.HIGHEST_PROTOCOL)
         
         # Print. 
         if cnt % 100 == 0:
@@ -294,12 +294,12 @@ def pack_features(args):
     for na in names:
         # Load feature. 
         feat_path = os.path.join(feat_dir, na)
-        data = cPickle.load(open(feat_path, 'rb'))
+        data = pickle.load(open(feat_path, 'rb'))
         [mixed_complx_x, speech_x, noise_x, alpha, na] = data
         mixed_x = np.abs(mixed_complx_x)
 
         # Pad start and finish of the spectrogram with boarder values. 
-        n_pad = (n_concat - 1) / 2
+        n_pad = int((n_concat - 1) / 2)
         mixed_x = pad_with_border(mixed_x, n_pad)
         speech_x = pad_with_border(speech_x, n_pad)
     
@@ -309,7 +309,7 @@ def pack_features(args):
         
         # Cut target spectrogram and take the center frame of each 3D segment. 
         speech_x_3d = mat_2d_to_3d(speech_x, agg_num=n_concat, hop=n_hop)
-        y = speech_x_3d[:, (n_concat - 1) / 2, :]
+        y = speech_x_3d[:, int((n_concat - 1) / 2), :]
         y_all.append(y)
     
         # Print. 
