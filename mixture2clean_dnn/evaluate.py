@@ -69,6 +69,7 @@ def calculate_pesq(args):
     # Calculate PESQ of all enhaced speech. 
     enh_speech_dir = os.path.join(workspace, "enh_wavs", "test", "%ddb" % int(te_snr))
     names = os.listdir(enh_speech_dir)
+
     for (cnt, na) in enumerate(names):
         print(cnt, na)
         enh_path = os.path.join(enh_speech_dir, na)
@@ -77,15 +78,17 @@ def calculate_pesq(args):
         speech_path = os.path.join(speech_dir, "%s.WAV" % speech_na)
         
         # Call executable PESQ tool. 
-        cmd = ' '.join(["./pesq", speech_path, enh_path, "+16000"])
-        os.system(cmd)        
+        cmd = ' '.join(["pesq", "+16000", speech_path, enh_path])
+
+        if os.system(cmd) != 0:
+            print("xxxxxx") # 调用失败时会打印"xxxxxx"
         
         
 def get_stats(args):
     """Calculate stats of PESQ. 
     """
     pesq_path = "_pesq_results.txt"
-    with open(pesq_path, 'rb') as f:
+    with open(pesq_path, 'rt') as f:
         reader = csv.reader(f, delimiter='\t')
         lis = list(reader)
         
