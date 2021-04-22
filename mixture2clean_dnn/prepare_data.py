@@ -72,7 +72,7 @@ def create_mixture_csv(args):
     for speech_na in speech_names:
         # Read speech. 
         speech_path = os.path.join(speech_dir, speech_na)
-        (speech_audio, _) = read_audio(speech_path)
+        (speech_audio, _) = read_audio(speech_path, target_fs=fs)
         len_speech = len(speech_audio)
         
         # For training data, mix each speech with randomly picked #magnification noises. 
@@ -87,7 +87,7 @@ def create_mixture_csv(args):
         # Mix one speech with different noises many times. 
         for noise_na in selected_noise_names:
             noise_path = os.path.join(noise_dir, noise_na)
-            (noise_audio, _) = read_audio(noise_path)
+            (noise_audio, _) = read_audio(noise_path, target_fs=fs)
             
             len_noise = len(noise_audio)
 
@@ -98,7 +98,7 @@ def create_mixture_csv(args):
             else:
                 noise_onset = rs.randint(0, len_noise - len_speech, size=1)[0]
                 nosie_offset = noise_onset + len_speech
-            
+
             if cnt % 100 == 0:
                 print(cnt)
                 
@@ -129,7 +129,7 @@ def calculate_mixture_features(args):
     
     # Open mixture csv. 
     mixture_csv_path = os.path.join(workspace, "mixture_csvs", "%s.csv" % data_type)
-    with open(mixture_csv_path, 'rt') as f:
+    with open(mixture_csv_path, 'r') as f:
         reader = csv.reader(f, delimiter='\t')
         lis = list(reader)
     
@@ -147,7 +147,7 @@ def calculate_mixture_features(args):
         # Read noise audio. 
         noise_path = os.path.join(noise_dir, noise_na)
         (noise_audio, _) = read_audio(noise_path, target_fs=fs)
-        
+
         # Repeat noise to the same length as speech. 
         if len(noise_audio) < len(speech_audio):
             n_repeat = int(np.ceil(float(len(speech_audio)) / float(len(noise_audio))))
@@ -156,11 +156,11 @@ def calculate_mixture_features(args):
         # Truncate noise to the same length as speech. 
         else:
             noise_audio = noise_audio[noise_onset : noise_offset]
-        
+
         # Scale speech to given snr. 
         scaler = get_amplitude_scaling_factor(speech_audio, noise_audio, snr=snr)
         speech_audio *= scaler
-        
+
         # Get normalized mixture, speech, noise. 
         (mixed_audio, speech_audio, noise_audio, alpha) = additive_mixing(speech_audio, noise_audio)
 
