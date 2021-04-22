@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MINIDATA=1
+MINIDATA=0
 if [ $MINIDATA -eq 1 ]; then
   WORKSPACE="/Users/fuyanjie/Desktop/Coding/PycharmProjects/SE/sednn_xu/mixture2clean_dnn/workspace"
 #  mkdir $WORKSPACE
@@ -10,11 +10,11 @@ if [ $MINIDATA -eq 1 ]; then
   TE_NOISE_DIR="/Users/fuyanjie/Desktop/Coding/PycharmProjects/SE/sednn_xu/mixture2clean_dnn/mini_data/test_noise"
   echo "Using mini data. "
 else
-  WORKSPACE="/vol/vssp/msos/qk/workspaces/speech_enhancement"
-  TR_SPEECH_DIR="/vol/vssp/msos/qk/workspaces/speech_enhancement/timit_wavs/train"
-  TR_NOISE_DIR="/vol/vssp/msos/qk/workspaces/speech_enhancement/nosie_wavs/train"
-  TE_SPEECH_DIR="/vol/vssp/msos/qk/workspaces/speech_enhancement/timit_wavs/subtest"
-  TE_NOISE_DIR="/vol/vssp/msos/qk/workspaces/speech_enhancement/nosie_wavs/test"
+  WORKSPACE="..\metadata_workspace"
+  TR_SPEECH_DIR=".\metadata\train_speech"
+  TR_NOISE_DIR=".\metadata\train_noise"
+  TE_SPEECH_DIR=".\metadata\sub_test_speech"
+  TE_NOISE_DIR=".\metadata\test_noise"
   echo "Using full data. "
 fi
 
@@ -43,16 +43,16 @@ LEARNING_RATE=1e-4
 #python main_dnn.py train --workspace=$WORKSPACE --tr_snr=$TR_SNR --te_snr=$TE_SNR --lr=$LEARNING_RATE
 
 # Plot training stat. 
-#python evaluate.py plot_training_stat --workspace=$WORKSPACE --tr_snr=$TR_SNR --bgn_iter=0 --fin_iter=10001 --interval_iter=1000
+python evaluate.py plot_training_stat --workspace=$WORKSPACE --tr_snr=$TR_SNR --bgn_iter=0 --fin_iter=10001 --interval_iter=1000
 
 # Inference, enhanced wavs will be created. 
 ITERATION=10000
 #CUDA_VISIBLE_DEVICES=3
-#python main_dnn.py inference --workspace=$WORKSPACE --tr_snr=$TR_SNR --te_snr=$TE_SNR --n_concat=$N_CONCAT --iteration=$ITERATION
+python main_dnn.py inference --workspace=$WORKSPACE --tr_snr=$TR_SNR --te_snr=$TE_SNR --n_concat=$N_CONCAT --iteration=$ITERATION
 
 # Calculate PESQ of all enhanced speech. 
-python evaluate.py calculate_pesq --workspace=$WORKSPACE --speech_dir=$TE_SPEECH_DIR --te_snr=$TE_SNR
+#python evaluate.py calculate_pesq --workspace=$WORKSPACE --speech_dir=$TE_SPEECH_DIR --te_snr=$TE_SNR
 
 # Calculate overall stats. 
-python evaluate.py get_stats
-
+#python evaluate.py get_stats
+read -p "press enter end"
