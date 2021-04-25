@@ -16,7 +16,7 @@ It is suggest to use mini data for a quick run before using full data. We alread
 
 1. pip install -r requirements.txt
 
-2. Download the PESQ evaluation tool (https://www.itu.int/rec/T-REC-P.862-200102-I/en) and compile the code by $ gcc -o pesq pesq_tool/*.c -lm
+2. Download the PESQ evaluation tool (https://www.itu.int/rec/T-REC-P.862-200102-I/en), change to the 'source' dir and compile the code by $ gcc -o pesq *.c -lm
 
 Copy the compiled executable pesq to mixture2clean_dnn/
 
