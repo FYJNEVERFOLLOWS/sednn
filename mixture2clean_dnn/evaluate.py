@@ -47,6 +47,7 @@ def plot_training_stat(args):
     plt.ylabel("Loss")
     plt.legend(handles=[line_tr, line_te])
     plt.xticks(np.arange(len(iters)), iters)
+    plt.savefig(workspace + '/training_process.png', dpi=600)
     plt.show()
 
 
