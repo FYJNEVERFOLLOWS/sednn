@@ -10,7 +10,8 @@ import csv
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-
+import soundfile as sf
+from pystoi import stoi
 
 def plot_training_stat(args):
     """Plot training and testing loss. 
@@ -83,6 +84,83 @@ def calculate_pesq(args):
 
         if os.system(cmd) != 0:
             print("xxxxxx") # 调用失败时会打印"xxxxxx"
+
+            
+def calculate_stoi(args):
+    """Calculate STOI of all enhaced speech.
+
+    Args:
+      workspace: str, path of workspace.
+      speech_dir: str, path of clean speech.
+      te_snr: float, testing SNR.
+    """
+    workspace = args.workspace
+    speech_dir = args.speech_dir
+    te_snr = args.te_snr
+
+    # Remove already existed file.
+    os.system('rm _stoi_results.txt')
+
+    with open('_stoi_results.txt', 'a') as f:
+        # Calculate STOI of all enhaced speech.
+        enh_speech_dir = os.path.join(workspace, "enh_wavs", "test", "%ddb" % int(te_snr))
+        names = os.listdir(enh_speech_dir)
+
+        for (cnt, na) in enumerate(names):
+            print(cnt, na)
+            enh_path = os.path.join(enh_speech_dir, na)
+
+            speech_na = na.split('.')[0]
+            speech_path = os.path.join(speech_dir, "%s.WAV" % speech_na)
+
+            clean, fs = sf.read(speech_path)
+            denoised, fs = sf.read(enh_path)
+
+            len_clean = len(clean)
+            len_denoised = len(denoised)
+            if len_denoised < len_clean:
+                clean = clean[0: len_denoised]
+            elif len_clean < len_denoised:
+                denoised = denoised[0: len_clean]
+
+            # Clean and denoised should have the same length, and be 1D
+            # stoi requires numpy == 1.15.0
+            res = stoi(clean, denoised, fs, extended=False)
+            f.write(na + '\t{}\n'.format(res))
+
+
+def get_stats_stoi(args):
+    """Calculate stats of STOI.
+    """
+    stoi_path = "10db_stoi_results.txt"
+    with open(stoi_path, 'rt') as f:
+        reader = csv.reader(f, delimiter='\t')
+        lis = list(reader) # len(lis) = 2521
+
+    stoi_dict = {}
+    for i1 in range(0, len(lis) - 1): # [0, 2519]
+        li = lis[i1]
+        na = li[0]
+        stoi = float(li[1])
+        noise_type = na.split('.')[1]
+        if noise_type not in stoi_dict.keys():
+            stoi_dict[noise_type] = [stoi]
+        else:
+            stoi_dict[noise_type].append(stoi)
+
+    avg_list, std_list = [], []
+    f = "{0:<16} {1:<16}"
+    print(f.format("Noise", "STOI"))
+    print("---------------------------------")
+    for noise_type in stoi_dict.keys():
+        stois = stoi_dict[noise_type]
+        avg_stoi = np.mean(stois)
+        std_stoi = np.std(stois)
+        avg_list.append(avg_stoi)
+        std_list.append(std_stoi)
+        print(f.format(noise_type, "%.4f +- %.4f" % (avg_stoi, std_stoi)))
+    print("---------------------------------")
+    print(f.format("Avg.", "%.4f +- %.4f" % (np.mean(avg_list), np.mean(std_list))))
         
         
 def get_stats(args):
@@ -135,6 +213,12 @@ if __name__ == '__main__':
     parser_calculate_pesq.add_argument('--speech_dir', type=str, required=True)
     parser_calculate_pesq.add_argument('--te_snr', type=float, required=True)
     
+    parser_calculate_pesq = subparsers.add_parser('calculate_stoi')
+    parser_calculate_pesq.add_argument('--workspace', type=str, required=True)
+    parser_calculate_pesq.add_argument('--speech_dir', type=str, required=True)
+    parser_calculate_pesq.add_argument('--te_snr', type=float, required=True)
+
+    parser_get_stats = subparsers.add_parser('get_stats_stoi')
     parser_get_stats = subparsers.add_parser('get_stats')
     
     args = parser.parse_args()
@@ -143,6 +227,10 @@ if __name__ == '__main__':
         plot_training_stat(args)
     elif args.mode == 'calculate_pesq':
         calculate_pesq(args)
+    elif args.mode == 'calculate_stoi':
+        calculate_stoi(args)
+    elif args.mode == 'get_stats_stoi':
+        get_stats_stoi(args)
     elif args.mode == 'get_stats':
         get_stats(args)
     else:
