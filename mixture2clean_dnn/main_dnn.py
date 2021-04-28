@@ -250,6 +250,7 @@ def inference(args):
             for j1 in range(3):
                 axs[j1].xaxis.tick_bottom()
             plt.tight_layout()
+            plt.savefig(workspace + '/log_spectrogram.png', dpi=600)
             plt.show()
 
         # Recover enhanced wav. 
