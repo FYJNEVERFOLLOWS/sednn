@@ -132,7 +132,7 @@ def calculate_stoi(args):
 def get_stats_stoi(args):
     """Calculate stats of STOI.
     """
-    stoi_path = "10db_stoi_results.txt"
+    stoi_path = "_stoi_results.txt"
     with open(stoi_path, 'rt') as f:
         reader = csv.reader(f, delimiter='\t')
         lis = list(reader) # len(lis) = 2521
