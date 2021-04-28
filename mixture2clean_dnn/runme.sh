@@ -43,15 +43,21 @@ LEARNING_RATE=1e-4
 #python main_dnn.py train --workspace=$WORKSPACE --tr_snr=$TR_SNR --te_snr=$TE_SNR --lr=$LEARNING_RATE
 
 # Plot training stat. 
-python evaluate.py plot_training_stat --workspace=$WORKSPACE --tr_snr=$TR_SNR --bgn_iter=0 --fin_iter=10001 --interval_iter=1000
+#python evaluate.py plot_training_stat --workspace=$WORKSPACE --tr_snr=$TR_SNR --bgn_iter=0 --fin_iter=10001 --interval_iter=1000
 
 # Inference, enhanced wavs will be created. 
 ITERATION=10000
 #CUDA_VISIBLE_DEVICES=3
-python main_dnn.py inference --workspace=$WORKSPACE --tr_snr=$TR_SNR --te_snr=$TE_SNR --n_concat=$N_CONCAT --iteration=$ITERATION
+#python main_dnn.py inference --workspace=$WORKSPACE --tr_snr=$TR_SNR --te_snr=$TE_SNR --n_concat=$N_CONCAT --iteration=$ITERATION --visualize
 
 # Calculate PESQ of all enhanced speech. 
 #python evaluate.py calculate_pesq --workspace=$WORKSPACE --speech_dir=$TE_SPEECH_DIR --te_snr=$TE_SNR
+
+# Calculate STOI of all enhanced speech.
+#python evaluate.py calculate_stoi --workspace=$WORKSPACE --speech_dir=$TE_SPEECH_DIR --te_snr=$TE_SNR
+
+# Calculate stoi overall stats.
+#python evaluate.py get_stats_stoi
 
 # Calculate overall stats. 
 #python evaluate.py get_stats
