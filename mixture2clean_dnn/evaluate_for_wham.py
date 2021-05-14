@@ -70,7 +70,7 @@ def calculate_pesq(args):
     
     # Calculate PESQ of all enhaced speech. 
     # enh_speech_dir = os.path.join(workspace, "enh_wavs", "test", "%ddb" % int(te_snr))
-    enh_speech_dir = "D:\FYJ\集群使用相关文件\WHAM\WHAM_16k_tt\s1"
+    enh_speech_dir = "your enhanced speech path"
     names = os.listdir(enh_speech_dir)
 
     for (cnt, na) in enumerate(names):
